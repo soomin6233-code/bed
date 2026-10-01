@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>C.A.R.E.B.E.D - Team ATLAS</title>
+    <!-- 구글 웹폰트 Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background-color: #f4f9f6; display: flex; justify-content: center; font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; color: #1e293b; letter-spacing: -0.3px; }
+        .app-container { width: 100%; max-width: 480px; height: 100vh; background-color: #ffffff; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        
+        header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #edf5f0; background-color: #ffffff; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .logo { color: #43a047; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+        .status-badge { background-color: #f0fdf4; color: #166534; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid #dcfce7; }
+        
+        .content-area { flex: 1; padding: 20px; overflow-y: auto; background-color: #ffffff; position: relative; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        
+        /* Empty State 세련된 모던 스타일 적용 */
+        .empty-state-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 48px 24px;
+            text-align: center;
+            margin: 10px 0 24px;
+            background: linear-gradient(180deg, #f8fdfa 0%, #ffffff 100%);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01), 0 10px 25px -5px rgba(22, 101, 52, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+        .empty-state-box::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(129, 199, 132, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .circle-icon {
+            width: 76px;
+            height: 76px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px;
+            color: #2e7d32;
+            font-size: 30px;
+            box-shadow: 0 8px 16px -4px rgba(46, 125, 50, 0.15);
+        }
+        .empty-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #0f172a; letter-spacing: -0.4px; }
+        .empty-desc { font-size: 13px; color: #64748b; line-height: 1.6; font-weight: 400; }
+        
+        /* 메인 버튼 스타일 */
+        .primary-btn { 
+            width: 100%; 
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+            color: #ffffff; 
+            border: none; 
+            border-radius: 16px; 
+            padding: 16px; 
+            font-size: 15px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            box-shadow: 0 6px 16px -2px rgba(67, 160, 71, 0.3); 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            margin-top: 10px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .primary-btn:active { 
+            transform: translateY(1px) scale(0.98); 
+            box-shadow: 0 3px 8px -2px rgba(67, 160, 71, 0.3);
+        }
+        .danger-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+            transition: all 0.2s;
+        }
+        .danger-btn:active { transform: scale(0.98); }
+        .sub-btn { width: 100%; background-color: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+        
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .step-back-text-btn { font-size: 12px; color: #2e7d32; cursor: pointer; font-weight: 500; background: #f0fdf4; padding: 6px 12px; border-radius: 20px; border: 1px solid #dcfce7; }
+
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #334155; }
+        .input-group input, .input-group select { width: 100%; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; box-sizing: border-box; background-color: #f8fafc; color: #0f172a; font-family: inherit; }
+        
+        .info-card { background-color: #f8fdfa; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin: 12px 0; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; }
+        .info-row:last-child { margin-bottom: 0; }
+        .info-label { color: #64748b; }
+        .info-value { color: #0f172a; font-weight: 700; }
+        
+        /* 등록된 매트리스 리스트 카드 디자인 */
+        .mattress-card { 
+            background-color: #ffffff; 
+            border-radius: 18px; 
+            padding: 18px 20px; 
+            margin-bottom: 14px; 
+            border: 1px solid #edf5f0; 
+            box-shadow: 0 4px 18px -2px rgba(0,0,0,0.04); 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            position: relative; 
+        }
+        .mattress-card:active { transform: scale(0.98); background-color: #f8fdfa; }
+        .mattress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .mat-title-group { display: flex; align-items: center; gap: 8px; }
+        .mat-title { font-size: 16px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; }
+        .mat-header-right { display: flex; align-items: center; gap: 8px; }
+        
+        .delete-mat-btn {
+            color: #94a3b8;
+            font-size: 15px;
+            padding: 6px 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .delete-mat-btn:hover, .delete-mat-btn:active {
+            color: #ef4444;
+            background-color: #fef2f2;
+        }
+        
+        .modern-badge { padding: 5px 11px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+        .risk-extreme { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .risk-high { background-color: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+        .risk-mid { background-color: #fefce8; color: #a16207; border: 1px solid #fef9c3; }
+        .risk-low { background-color: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
+        
+        .result-header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .help-circle-btn { width: 32px; height: 32px; background-color: #f0fdf4; border: 1px solid #dcfce7; color: #166534; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; cursor: pointer; }
+
+        .result-main-card { text-align: center; padding: 24px 20px; background-color: #f8fdfa; border-radius: 20px; margin-bottom: 16px; border: 1px solid #edf5f0; }
+        .result-score-title { font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 4px; }
+        .result-score-num { font-size: 38px; font-weight: 900; color: #166534; margin: 4px 0; }
+        
+        .breakdown-card { background-color: #ffffff; border: 1px solid #edf5f0; border-radius: 16px; padding: 18px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .breakdown-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        .breakdown-item:last-child { border-bottom: none; }
+        .breakdown-val { font-weight: 700; color: #166534; }
+
+        .switch-container { display: flex; background-color: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 14px; }
+        .switch-btn { flex: 1; padding: 9px; text-align: center; font-weight: 700; font-size: 13px; border-radius: 8px; cursor: pointer; color: #64748b; transition: 0.2s; }
+        .switch-btn.active-press { background-color: #ffffff; color: #166534; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .switch-btn.active-env { background-color: #ffffff; color: #0284c7; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .grid-viewport { width: 100%; overflow: hidden; position: relative; border-radius: 16px; margin: 8px 0; }
+        .grid-slider { display: flex; width: 200%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        .grid-page { width: 50%; box-sizing: border-box; }
+
+        /* 5x5 체압 그리드 (수정됨) */
+        .grid-container-5x5 { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 6px; 
+            width: 100%; 
+            aspect-ratio: 1/1; 
+            background-color: #f8fdfa; 
+            padding: 12px; 
+            border-radius: 16px; 
+            border: 1px solid #edf5f0; 
+        }
+        
+        /* 2x2 온습도 그리드 (수정됨) */
+        .grid-container-2x2 { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            width: 100%; 
+            aspect-ratio: 1/1; 
+            background-color: #f0f9ff; 
+            padding: 12px; 
+            border-radius: 16px; 
+            border: 1px solid #e0f2fe; 
+        }
+        .env-card-cell { 
+            background-color: #ffffff; 
+            border-radius: 12px; 
+            border: 1px solid #bae6fd; 
+            padding: 12px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            box-shadow: 0 2px 4px rgba(2, 132, 199, 0.04); 
+        }
+        .env-cell-title { font-size: 13px; font-weight: 700; color: #0369a1; margin-bottom: 6px; }
+        .env-cell-val { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; margin: 2px 0; }
+
+        .grid-cell { border-radius: 8px; cursor: pointer; user-select: none; transition: transform 0.1s; }
+        .grid-cell.selected { border: 2.5px solid #ffffff !important; box-shadow: 0 0 6px rgba(0,0,0,0.3); transform: scale(0.92); }
+
+        .legend-container { display: flex; justify-content: space-between; margin: 4px 0 12px; font-size: 11px; color: #64748b; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .legend-box { width: 10px; height: 10px; border-radius: 2px; }
+
+        .gear-popover { display: none; position: absolute; top: 45px; right: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); z-index: 500; width: 160px; }
+        .gear-popover.active { display: block; }
+        .gear-popover::after { content: ''; position: absolute; top: -7px; right: 10px; border-width: 0 7px 7px 7px; border-style: solid; border-color: transparent transparent #ffffff transparent; }
+        .popover-item { padding: 12px 14px; font-size: 13px; font-weight: 500; color: #334155; cursor: pointer; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px; }
+        .popover-item:last-child { border-bottom: none; }
+        .popover-item:active { background-color: #f8fafc; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: #ffffff; width: 85%; max-width: 340px; border-radius: 20px; padding: 22px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); position: relative; }
+        .close-x-btn { position: absolute; top: 18px; right: 18px; font-size: 16px; color: #94a3b8; cursor: pointer; padding: 4px; }
+
+        .noti-card { background-color: #ffffff; border: 1px solid #f1f5f9; border-left: 4px solid #ef4444; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: 0.2s; }
+        .noti-card:active { background-color: #f8fafc; transform: scale(0.99); }
+        .noti-patient-info { font-size: 12px; font-weight: 700; color: #1e293b; background: #f1f5f9; padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 6px; }
+
+        .record-card { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 10px; cursor: pointer; }
+        .record-card:active { background-color: #f8fdfa; }
+
+        .slider-item { margin-bottom: 14px; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #f1f5f9; }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; font-weight: 700; }
+        .slider-range { width: 100%; accent-color: #81c784; cursor: pointer; }
+
+        .pairing-box { text-align: center; padding: 30px 20px; background-color: #f8fdfa; border: 1px dashed #a5d6a7; border-radius: 16px; margin: 20px 0; }
+
+        .bottom-nav { display: flex; justify-content: space-around; border-top: 1px solid #edf5f0; padding: 10px 0; background-color: #ffffff; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #94a3b8; font-size: 11px; cursor: pointer; gap: 4px; flex: 1; font-weight: 500; }
+        .nav-item i { font-size: 18px; }
+        .nav-item.active { color: #2e7d32; font-weight: 700; }
+
+        .inline-back-btn { font-size: 18px; color: #2e7d32; cursor: pointer; padding: 4px 6px; transition: transform 0.1s; }
+        .inline-back-btn:active { transform: scale(0.9); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <div class="header-left">
+            <div class="logo">C.A.R.E.B.E.D</div>
+        </div>
+        <div class="header-right">
+            <div class="status-badge" id="mat-count">연결됨: 0개</div>
+        </div>
+    </header>
+
+    <div class="content-area" onclick="closePopoverOutside(event)">
+        <!-- 1. 메인 화면 -->
+        <div id="screen-main" class="screen active">
+            <div id="mattress-list-container">
+                <div class="empty-state-box">
+                    <div class="circle-icon"><i class="fa-solid fa-bed"></i></div>
+                    <div class="empty-title">연결된 매트리스가 없습니다</div>
+                    <div class="empty-desc">새로운 매트리스를 추가하여 모니터링을 시작하세요</div>
+                </div>
+            </div>
+            <button class="primary-btn" onclick="changeScreen('screen-add-info')"><i class="fa-solid fa-plus"></i> 매트리스 추가하기</button>
+        </div>
+
+        <!-- 2. 환자 정보 입력 화면 -->
+        <div id="screen-add-info" class="screen">
+            <div class="section-header">
+                <h2 style="margin:0; font-size:18px;">환자 기본 정보 입력</h2>
+                <div class="step-back-text-btn" onclick="changeScreen('screen-main')"><i class="fa-solid fa-chevron-left"></i> 이전</div>
+            </div>
+
+            <div class="input-group">
+                <label>매트리스 이름</label>
+                <input type="text" id="input-mat-name" placeholder="예: 301호 1번 베드">
+            </div>
+            <div class="input-group">
+                <label>환자 이름</label>
+                <input type="text" id="input-pat-name" placeholder="예: 홍길동">
+            </div>
+            <div class="input-group">
+                <label>환자 위치</label>
+                <input type="text" id="input-pat-loc" placeholder="예: 제 1병동 301호">
+            </div>
+            
+            <button class="primary-btn" onclick="goToBraden()">다음: 욕창 위험도 평가</button>
+            <button class="sub-btn" onclick="changeScreen('screen-main')">취소</button>
+        </div>
+
+        <!-- 3. Braden Scale 측정 화면 -->
+        <div id="screen-braden" class="screen">
+            <div class="section-header">
+                <h2 style="margin:0; font-size:18px;">생체 정보 측정</h2>
+                <div class="step-back-text-btn" onclick="changeScreen('screen-add-info')"><i class="fa-solid fa-chevron-left"></i> 이전단계</div>
+            </div>
+
+            <div class="input-group"><label>1. 감각인지</label><select id="b1"><option value="1">1점: 전혀 없음</option><option value="2">2점: 매우 제한됨</option><option value="3">3점: 약간 제한됨</option><option value="4" selected>4점: 장애 없음</option></select></div>
+            <div class="input-group"><label>2. 습기</label><select id="b2"><option value="1">1점: 지속적으로 습함</option><option value="2">2점: 습함</option><option value="3">3점: 때때로 습함</option><option value="4" selected>4점: 거의 습하지 않음</option></select></div>
+            <div class="input-group"><label>3. 활동</label><select id="b3"><option value="1">1점: 침상에서 안정</option><option value="2">2점: 의자에 앉을 수 있음</option><option value="3">3점: 때때로 보행</option><option value="4" selected>4점: 정상 활동</option></select></div>
+            <div class="input-group"><label>4. 침상 움직임</label><select id="b4"><option value="1">1점: 불가능</option><option value="2">2점: 매우 제한됨</option><option value="3">3점: 약간 제한됨</option><option value="4" selected>4점: 정상</option></select></div>
+            <div class="input-group"><label>5. 영양 상태</label><select id="b5"><option value="1">1점: 불량</option><option value="2">2점: 부적절함</option><option value="3">3점: 적절함</option><option value="4" selected>4점: 양호</option></select></div>
+            <div class="input-group"><label>6. 마찰 상태</label><select id="b6"><option value="1">1점: 문제 있음</option><option value="2">2점: 잠재적 문제 있음</option><option value="3" selected>3점: 문제 없음</option></select></div>
+            
+            <button class="primary-btn" onclick="calculateResult()">최종결과확인</button>
+            <button class="sub-btn" onclick="changeScreen('screen-add-info')">이전 단계</button>
+        </div>
+
+        <!-- 4. 결과 확인 화면 -->
+        <div id="screen-result" class="screen">
+            <div class="result-header-area">
+                <div class="step-back-text-btn" onclick="changeScreen('screen-braden')"><i class="fa-solid fa-chevron-left"></i> 재평가</div>
+                <h2 style="margin:0; color: #166534; font-size:17px;">욕창 위험도 평가 결과</h2>
+                <div class="help-circle-btn" onclick="openBradenHelpModal()"><i class="fa-solid fa-question"></i></div>
+            </div>
+            
+            <div class="result-main-card">
+                <div class="result-score-title">Braden Scale 총점</div>
+                <div class="result-score-num" id="res-score">0점</div>
+                <div id="res-risk-badge-container"></div>
+            </div>
+
+            <div class="breakdown-card">
+                <div style="text-align:center; font-weight:700; color:#166534; margin-bottom:12px; font-size:14px;"><i class="fa-solid fa-list-check"></i> 항목별 평가 내역</div>
+                <div class="breakdown-item"><span>1. 감각인지</span><span class="breakdown-val" id="res-b1">-</span></div>
+                <div class="breakdown-item"><span>2. 습기</span><span class="breakdown-val" id="res-b2">-</span></div>
+                <div class="breakdown-item"><span>3. 활동</span><span class="breakdown-val" id="res-b3">-</span></div>
+                <div class="breakdown-item"><span>4. 침상 움직임</span><span class="breakdown-val" id="res-b4">-</span></div>
+                <div class="breakdown-item"><span>5. 영양 상태</span><span class="breakdown-val" id="res-b5">-</span></div>
+                <div class="breakdown-item"><span>6. 마찰 상태</span><span class="breakdown-val" id="res-b6">-</span></div>
+            </div>
+
+            <button class="primary-btn" onclick="changeScreen('screen-pairing')">제품 (ESP32) 연동하기</button>
+        </div>
+
+        <!-- 5. ESP32 페어링 화면 -->
+        <div id="screen-pairing" class="screen">
+            <div class="section-header">
+                <h2 style="margin:0; font-size:18px;">ESP32 기기 페어링</h2>
+                <div class="step-back-text-btn" onclick="changeScreen('screen-result')"><i class="fa-solid fa-chevron-left"></i> 이전</div>
+            </div>
+            <p style="font-size:13px; color:#64748b;">매트리스 제어부 전원을 켜고 연결을 시도하세요.</p>
+            
+            <div class="pairing-box">
+                <i class="fa-solid fa-wifi" id="pairing-icon" style="font-size: 36px; color: #81c784; margin-bottom: 12px;"></i>
+                <div id="pairing-status" style="font-weight: 700; font-size: 15px;">Firebase 실시간 데이터 연동 중</div>
+                <div id="pairing-sub" style="font-size: 12px; color: #64748b; margin-top: 4px;">클라우드와 자동 동기화됩니다.</div>
+            </div>
+
+            <button class="primary-btn" onclick="completeRegistration()">모니터링 시작하기</button>
+        </div>
+
+        <!-- 6. 실시간 모니터링 화면 (5x5 체압 & 2x2 온습도 지원) -->
+        <div id="screen-monitor" class="screen">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-arrow-left inline-back-btn" onclick="goBackToMain()"></i>
+                    <h2 style="margin:0; font-size:18px;" id="mon-mat-name">매트리스 모니터링</h2>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div id="mon-risk-badge-container"></div>
+                    <i class="fa-solid fa-gear" id="gear-icon-btn" onclick="toggleGearPopover(event)" style="font-size:20px; color:#2e7d32; cursor:pointer; padding:4px;"></i>
+                </div>
+            </div>
+
+            <div class="gear-popover" id="gear-popover">
+                <div class="popover-item" onclick="openEditPatientModal()"><i class="fa-solid fa-user-pen" style="color:#2e7d32;"></i> 환자 정보 수정</div>
+                <div class="popover-item" onclick="openSettingsModal()"><i class="fa-solid fa-sliders" style="color:#2e7d32;"></i> 알림 설정</div>
+                <div class="popover-item" onclick="promptResetGrid()"><i class="fa-solid fa-arrows-rotate" style="color:#ef4444;"></i> 초기화하기</div>
+            </div>
+
+            <div class="info-card" style="margin-top:0; margin-bottom:10px;">
+                <div class="info-row"><span class="info-label">환자명:</span><span class="info-value" id="mon-pat-name">-</span></div>
+                <div class="info-row"><span class="info-label">위치:</span><span class="info-value" id="mon-pat-loc">-</span></div>
+            </div>
+
+            <div class="switch-container">
+                <div class="switch-btn active-press" id="sw-press" onclick="switchGridMode('press')">
+                    <i class="fa-solid fa-gauge-high"></i> 체압 분포 (5x5)
+                </div>
+                <div class="switch-btn" id="sw-env" onclick="switchGridMode('env')">
+                    <i class="fa-solid fa-temperature-half"></i> 온·습도 (2x2)
+                </div>
+            </div>
+
+            <div class="legend-container" id="press-legend">
+                <div class="legend-item"><div class="legend-box" style="background:#4caf50;"></div>위험 Level 1</div>
+                <div class="legend-item"><div class="legend-box" style="background:#fbc02d;"></div>위험 Level 2</div>
+                <div class="legend-item"><div class="legend-box" style="background:#ffa000;"></div>위험 Level 3</div>
+                <div class="legend-item"><div class="legend-box" style="background:#e53935;"></div>위험 Level 4</div>
+                <div class="legend-item"><div class="legend-box" style="background:#212121;"></div>위험 Level 5</div>
+            </div>
+
+            <div class="grid-viewport">
+                <div class="grid-slider" id="grid-slider">
+                    <div class="grid-page"><div class="grid-container-5x5" id="grid-5x5"></div></div>
+                    <div class="grid-page"><div class="grid-container-2x2" id="grid-2x2"></div></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; border-top: 1px dashed #e2e8f0; padding-top: 15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0; font-size:15px; color:#166534;"><i class="fa-solid fa-floppy-disk"></i> 상태 히스토리 기록</h3>
+                    <button class="primary-btn" onclick="saveCurrentStateRecord()" style="width:auto; padding:8px 14px; margin:0; font-size:12px;">현재 상태 저장</button>
+                </div>
+                <div id="record-history-container">
+                    <p style="font-size:12px; color:#94a3b8; text-align:center;">저장된 상태 기록이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 알림 화면 -->
+        <div id="screen-noti" class="screen">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 style="margin:0; font-size:18px;">알림 내역</h2>
+                <button onclick="clearAllNotifications()" style="background:none; border:none; color:#ef4444; font-size:12px; font-weight:700; cursor:pointer;">전체 삭제</button>
+            </div>
+            <div id="notifications-container">
+                <p style="font-size:13px; color:#94a3b8; text-align:center; margin-top:30px;">수신된 경고 알림이 없습니다.</p>
+            </div>
+        </div>
+
+        <!-- 8. 설정 화면 -->
+        <div id="screen-setting" class="screen">
+            <h2 style="margin-top:0; font-size:18px;">설정</h2>
+            <div class="info-card">
+                <h3 style="margin-top:0; font-size: 15px; margin-bottom: 12px; color:#166534;"><i class="fa-solid fa-circle-info" style="margin-right:5px;"></i>앱 정보</h3>
+                <div class="info-row"><span class="info-label">개발자</span><span class="info-value">Team ATLAS</span></div>
+                <div class="info-row"><span class="info-label">버전</span><span class="info-value">1.0.0 (Prototype 5x5)</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 팝업 모달 1: 체압 상세 모달 -->
+    <div class="modal-overlay" id="info-modal">
+        <div class="modal-content">
+            <i class="fa-solid fa-xmark close-x-btn" onclick="closeModal('info-modal')"></i>
+            <h3 style="margin-top:0; color:#166534; font-size:16px;" id="modal-title">정보</h3>
+            <div id="modal-body-content"></div>
+            <button class="primary-btn" onclick="closeModal('info-modal')" style="margin-top:15px; padding:12px;">확인</button>
+        </div>
+    </div>
+
+    <!-- 팝업 모달 2: 알림 임계값 설정 모달 -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-content" style="max-width:340px;">
+            <i class="fa-solid fa-xmark close-x-btn" onclick="closeModal('settings-modal')"></i>
+            <h3 style="margin-top:0; color:#166534; font-size:16px;"><i class="fa-solid fa-sliders"></i> 임계값 알림 설정</h3>
+            
+            <div class="slider-item">
+                <div class="slider-header">
+                    <span><input type="checkbox" id="chk-press" checked> 압력 임계값</span>
+                    <span id="val-press" style="color:#166534;">60점</span>
+                </div>
+                <input type="range" min="0" max="100" value="60" class="slider-range" id="range-press" oninput="document.getElementById('val-press').innerText=this.value+'점'">
+            </div>
+
+            <div class="slider-item">
+                <div class="slider-header">
+                    <span><input type="checkbox" id="chk-temp" checked> 온도 임계값</span>
+                    <span id="val-temp" style="color:#ef4444;">37.0 °C</span>
+                </div>
+                <input type="range" min="30" max="40" step="0.5" value="37.0" class="slider-range" id="range-temp" oninput="document.getElementById('val-temp').innerText=parseFloat(this.value).toFixed(1)+' °C'">
+            </div>
+
+            <div class="slider-item">
+                <div class="slider-header">
+                    <span><input type="checkbox" id="chk-humi" checked> 습도 임계값</span>
+                    <span id="val-humi" style="color:#0284c7;">60 %</span>
+                </div>
+                <input type="range" min="20" max="90" value="60" class="slider-range" id="range-humi" oninput="document.getElementById('val-humi').innerText=this.value+' %'">
+            </div>
+
+            <button class="primary-btn" onclick="saveSettingsAndClose()" style="margin-top:10px; padding:12px;">설정 저장 및 닫기</button>
+        </div>
+    </div>
+
+    <!-- 팝업 모달 3: 히스토리 그리드 스냅샷 모달 (5x5 / 2x2 지원) -->
+    <div class="modal-overlay" id="history-snapshot-modal">
+        <div class="modal-content" style="max-width:340px;">
+            <i class="fa-solid fa-xmark close-x-btn" onclick="closeModal('history-snapshot-modal')"></i>
+            <h3 style="margin-top:0; color:#166534; font-size:16px;" id="snap-title">기록 당시 그리드 상태</h3>
+            <div style="font-size:12px; color:#64748b; margin-bottom:8px;" id="snap-time">기록 일시</div>
+            
+            <div class="switch-container" style="margin-bottom:8px;">
+                <div class="switch-btn active-press" id="snap-sw-press" onclick="switchSnapGridMode('press')">체압 (5x5)</div>
+                <div class="switch-btn" id="snap-sw-env" onclick="switchSnapGridMode('env')">온습도 (2x2)</div>
+            </div>
+
+            <div class="grid-viewport" style="margin:5px 0;">
+                <div class="grid-slider" id="snap-grid-slider">
+                    <div class="grid-page"><div class="grid-container-5x5" id="snap-grid-5x5"></div></div>
+                    <div class="grid-page"><div class="grid-container-2x2" id="snap-grid-2x2"></div></div>
+                </div>
+            </div>
+
+            <button class="primary-btn" onclick="closeModal('history-snapshot-modal')" style="padding:10px; margin-top:5px;">닫기</button>
+        </div>
+    </div>
+
+    <!-- 팝업 모달 4: 초기화 확인 모달 -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content" style="text-align:center;">
+            <i class="fa-solid fa-xmark close-x-btn" onclick="closeModal('confirm-modal')"></i>
+            <h3 style="margin-top:0; color:#166534; font-size:16px;">정보 초기화 확인</h3>
+            <p style="font-size:13px; color:#475569; line-height:1.5;">초기화하기 전 현재 센서 상태 및 유지시간 기록을 히스토리에 저장하시겠습니까?</p>
+            <div style="display:flex; gap:8px; margin-top:16px;">
+                <button class="primary-btn" onclick="confirmReset(true)" style="padding:10px; margin:0; font-size:12px;">예 (기록 후 초기화)</button>
+                <button class="sub-btn" onclick="confirmReset(false)" style="padding:10px; margin:0; font-size:12px;">아니오 (바로 초기화)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 팝업 모달 5: 환자 정보 및 욕창 위험도 수정 모달 -->
+    <div class="modal-overlay" id="edit-patient-modal">
+        <div class="modal-content" style="max-width:340px;">
+            <i class="fa-solid fa-xmark close-x-btn" onclick="closeModal('edit-patient-modal')"></i>
+            <h3 style="margin-top:0; color:#166534; font-size:16px;"><i class="fa-solid fa-user-pen"></i> 환자 정보 수정</h3>
+            
+            <div class="input-group">
+                <label>매트리스 이름</label>
+                <input type="text" id="edit-mat-name">
+            </div>
+            <div class="input-group">
+                <label>환자 이름</label>
+                <input type="text" id="edit-pat-name">
+            </div>
+            <div class="input-group">
+                <label>환자 위치</label>
+                <input type="text" id="edit-pat-loc">
+            </div>
+            <div class="input-group">
+                <label>욕창 위험도 단계 지정</label>
+                <select id="edit-risk-level">
+                    <option value="extreme">최고 위험군 (Braden 8점)</option>
+                    <option value="high">고위험군 (Braden 11점)</option>
+                    <option value="mid">중정도 위험군 (Braden 14점)</option>
+                    <option value="low">저위험군 (Braden 17점)</option>
+                    <option value="normal">정상(위험성 낮음) (Braden 20점)</option>
+                </select>
+            </div>
+
+            <button class="primary-btn" onclick="savePatientEdit()" style="margin-top:10px; padding:12px;">수정사항 저장</button>
+        </div>
+    </div>
+
+    <!-- 팝업 모달 6: 매트리스 삭제 확인 모달 -->
+    <div class="modal-overlay" id="delete-mat-modal">
+        <div class="modal-content" style="text-align:center; max-width:340px;">
+            <i class="fa-solid fa-xmark close-x-btn" onclick="closeModal('delete-mat-modal')"></i>
+            <div style="width: 50px; height: 50px; background-color: #fef2f2; color: #ef4444; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 12px; font-size: 22px;">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 style="margin-top:0; color:#991b1b; font-size:16px;">매트리스 삭제</h3>
+            <p style="font-size:13px; color:#475569; line-height:1.5; margin-bottom: 20px;">
+                정말로 '<b id="delete-mat-target-name" style="color: #0f172a;">-</b>' 매트리스를 삭제하시겠습니까?<br>
+                <span style="font-size: 11.5px; color: #ef4444;">※ 삭제된 기기 데이터는 복구할 수 없습니다.</span>
+            </p>
+            <div style="display:flex; gap:8px;">
+                <button class="danger-btn" onclick="confirmDeleteMattress()">삭제하기</button>
+                <button class="sub-btn" onclick="closeModal('delete-mat-modal')" style="margin:0; padding:12px;">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" id="tab-main" onclick="changeScreen('screen-main', 'tab-main')">
+            <i class="fa-solid fa-bed"></i><span>매트관리</span>
+        </div>
+        <div class="nav-item" id="tab-noti" onclick="changeScreen('screen-noti', 'tab-noti')">
+            <i class="fa-regular fa-bell"></i><span id="tab-noti-text">알림</span>
+        </div>
+        <div class="nav-item" id="tab-setting" onclick="changeScreen('screen-setting', 'tab-setting')">
+            <i class="fa-solid fa-gear"></i><span>설정</span>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDK 및 웹 앱 로직 -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        databaseURL: "https://carebed-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const mattressRef = ref(db, 'mattress_01');
+
+    onValue(mattressRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            if (data.press && Array.isArray(data.press)) {
+                window.pressGridData = data.press;
+                window.create5x5Grid();
+            }
+            if (data.env && Array.isArray(data.env)) {
+                window.envGridData = data.env;
+                window.create2x2Grid();
+            }
+            window.checkAlertThresholds();
+        }
+    });
+</script>
+
+<script>
+    let mattresses = [];
+    let tempData = {};
+    let currentActiveMatId = null;
+    let targetDeleteMatId = null;
+    let pressCellIndex = null;
+    
+    // 글로벌 바인딩 변수 (수정됨: 25개 체압, 4개 온습도 프로토타입 스펙)
+    window.pressGridData = Array(25).fill(0).map(() => ({ score: 0, pressure: "0.0", durationSec: 0 }));
+    window.envGridData = Array(4).fill(0).map(() => ({ temp: "0.0", humi: 0 }));
+    
+    let savedRecords = [];
+    let notifications = [];
+    let triggeredAlerts = { press: false, temp: false, humi: false };
+    let timerInterval = null;
+
+    function changeScreen(targetScreenId, targetTabId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(targetScreenId).classList.add('active');
+
+        if(targetTabId) {
+            document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(targetTabId).classList.add('active');
+        }
+    }
+
+    function goBackToMain() { changeScreen('screen-main', 'tab-main'); }
+
+    function goToBraden() {
+        const matName = document.getElementById('input-mat-name').value;
+        const patName = document.getElementById('input-pat-name').value;
+        const patLoc = document.getElementById('input-pat-loc').value;
+        if(!matName || !patName || !patLoc) { alert("모든 정보를 입력해주세요."); return; }
+        tempData = { matName, patName, patLoc };
+        changeScreen('screen-braden');
+    }
+
+    function getModernBadgeHTML(score, riskText) {
+        let riskClass = "risk-low";
+        if (score <= 9) riskClass = "risk-extreme";
+        else if (score <= 12) riskClass = "risk-high";
+        else if (score <= 14) riskClass = "risk-mid";
+
+        return `<span class="modern-badge ${riskClass}">${riskText} (${score}점)</span>`;
+    }
+
+    function calculateResult() {
+        let score = 0;
+        for(let i = 1; i <= 6; i++) {
+            const val = parseInt(document.getElementById('b' + i).value);
+            score += val;
+            document.getElementById('res-b' + i).innerText = `${val}점`;
+        }
+        let riskText = "";
+        if (score <= 9) riskText = "최고 위험군";
+        else if (score <= 12) riskText = "고위험군";
+        else if (score <= 14) riskText = "중정도 위험군";
+        else if (score <= 18) riskText = "저위험군";
+        else riskText = "정상(위험성 낮음)";
+
+        tempData.score = score; tempData.riskText = riskText;
+        document.getElementById('res-score').innerText = score + "점";
+        document.getElementById('res-risk-badge-container').innerHTML = getModernBadgeHTML(score, riskText);
+        changeScreen('screen-result');
+    }
+
+    function openBradenHelpModal() {
+        document.getElementById('modal-title').innerText = "욕창 위험도 평가란?";
+        document.getElementById('modal-body-content').innerHTML = `
+            <div style="font-size: 13px; color: #475569; line-height: 1.6; text-align: left; margin-bottom: 12px;">
+                욕창 위험도 평가란 욕창 위험 예측을 위해 1987년 Barbara Braden 과 Nancy Bergstrom 이 개발한 척도입니다.
+            </div>
+            <div style="background-color: #f8fdfa; padding: 12px; border-radius: 10px; font-size: 12px; text-align: left; border: 1px solid #edf5f0;">
+                <div style="font-weight: 700; margin-bottom: 4px; color: #166534;">[위험군 분류 기준]</div>
+                • <b>9점 이하</b> : 최고 위험군<br>• <b>10-12점</b> : 고위험군<br>• <b>13-14점</b> : 중정도 위험군<br>• <b>15-18점</b> : 저위험군
+            </div>`;
+        document.getElementById('info-modal').classList.add('active');
+    }
+
+    function completeRegistration() {
+        const newMat = {...tempData, id: Date.now()}; mattresses.push(newMat); renderMattressList();
+        document.getElementById('input-mat-name').value = ""; document.getElementById('input-pat-name').value = ""; document.getElementById('input-pat-loc').value = "";
+        openMonitorScreen(newMat);
+    }
+
+    function openMonitorScreen(mat) {
+        currentActiveMatId = mat.id;
+        document.getElementById('mon-mat-name').innerText = mat.matName;
+        document.getElementById('mon-pat-name').innerText = mat.patName;
+        document.getElementById('mon-pat-loc').innerText = mat.patLoc;
+        document.getElementById('mon-risk-badge-container').innerHTML = getModernBadgeHTML(mat.score, mat.riskText);
+
+        window.create5x5Grid(); 
+        window.create2x2Grid(); 
+        switchGridMode('press'); 
+        startRealtimeTimer();
+        changeScreen('screen-monitor');
+    }
+
+    function switchGridMode(mode) {
+        const slider = document.getElementById('grid-slider'), swPress = document.getElementById('sw-press'), swEnv = document.getElementById('sw-env'), legend = document.getElementById('press-legend');
+        if (mode === 'press') { slider.style.transform = 'translateX(0%)'; swPress.className = 'switch-btn active-press'; swEnv.className = 'switch-btn'; legend.style.visibility = 'visible'; }
+        else { slider.style.transform = 'translateX(-50%)'; swEnv.className = 'switch-btn active-env'; swPress.className = 'switch-btn'; legend.style.visibility = 'hidden'; }
+    }
+
+    function startRealtimeTimer() {
+        if(timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if(window.pressGridData) {
+                window.pressGridData.forEach(p => p.durationSec++);
+            }
+            window.checkAlertThresholds();
+        }, 1000);
+    }
+
+    window.checkAlertThresholds = function() {
+        if(!currentActiveMatId) return;
+        const currentMat = mattresses.find(m => m.id === currentActiveMatId);
+        if(!currentMat) return;
+
+        const chkPress = document.getElementById('chk-press').checked, valPress = parseInt(document.getElementById('range-press').value);
+        const chkTemp = document.getElementById('chk-temp').checked, valTemp = parseFloat(document.getElementById('range-temp').value);
+        const chkHumi = document.getElementById('chk-humi').checked, valHumi = parseInt(document.getElementById('range-humi').value);
+        const nowStr = new Date().toLocaleTimeString();
+
+        if(chkPress && window.pressGridData.length > 0) {
+            const maxP = Math.max(...window.pressGridData.map(p => p.score));
+            if(maxP >= valPress) {
+                if(!triggeredAlerts.press) {
+                    notifications.unshift({ 
+                        id: Date.now(), matId: currentMat.id, patName: currentMat.patName, patLoc: currentMat.patLoc,
+                        title: '⚠️ 체압 임계치 초과', msg: `최대 체압 점수(${maxP}점)가 설정 기준(${valPress}점)을 넘었습니다.`, time: nowStr 
+                    });
+                    triggeredAlerts.press = true; renderNotifications();
+                }
+            } else { triggeredAlerts.press = false; }
+        }
+
+        if(chkTemp && window.envGridData.length > 0) {
+            const maxT = Math.max(...window.envGridData.map(e => parseFloat(e.temp)));
+            if(maxT >= valTemp) {
+                if(!triggeredAlerts.temp) {
+                    notifications.unshift({ 
+                        id: Date.now(), matId: currentMat.id, patName: currentMat.patName, patLoc: currentMat.patLoc,
+                        title: '🌡️ 고온 임계치 초과', msg: `최대 온도(${maxT}°C)가 설정 기준(${valTemp}°C)을 넘었습니다.`, time: nowStr 
+                    });
+                    triggeredAlerts.temp = true; renderNotifications();
+                }
+            } else { triggeredAlerts.temp = false; }
+        }
+
+        if(chkHumi && window.envGridData.length > 0) {
+            const maxH = Math.max(...window.envGridData.map(e => e.humi));
+            if(maxH >= valHumi) {
+                if(!triggeredAlerts.humi) {
+                    notifications.unshift({ 
+                        id: Date.now(), matId: currentMat.id, patName: currentMat.patName, patLoc: currentMat.patLoc,
+                        title: '💧 고습 임계치 초과', msg: `최대 습도(${maxH}%)가 설정 기준(${valHumi}%)을 넘었습니다.`, time: nowStr 
+                    });
+                    triggeredAlerts.humi = true; renderNotifications();
+                }
+            } else { triggeredAlerts.humi = false; }
+        }
+    };
+
+    function renderNotifications() {
+        const container = document.getElementById('notifications-container'), badgeText = document.getElementById('tab-noti-text');
+        if(notifications.length === 0) {
+            container.innerHTML = `<p style="font-size:13px; color:#94a3b8; text-align:center; margin-top:30px;">수신된 경고 알림이 없습니다.</p>`;
+            badgeText.innerText = "알림"; return;
+        }
+        badgeText.innerText = `알림(${notifications.length})`;
+        container.innerHTML = "";
+        notifications.forEach(n => {
+            container.innerHTML += `
+                <div class="noti-card" onclick="navigateToMatFromNoti(${n.matId})">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span class="noti-patient-info"><i class="fa-solid fa-user"></i> ${n.patName} 환자 (${n.patLoc})</span>
+                        <i class="fa-solid fa-xmark" onclick="deleteNotification(event, ${n.id})" style="cursor:pointer; color:#94a3b8; font-size:14px; padding:2px;"></i>
+                    </div>
+                    <div style="font-size:13px; font-weight:700; color:#ef4444; margin-bottom:3px;">${n.title}</div>
+                    <div style="font-size:12px; color:#475569; margin-bottom:4px;">${n.msg}</div>
+                    <div style="font-size:11px; color:#94a3b8; text-align:right;">${n.time}</div>
+                </div>`;
+        });
+    }
+
+    function navigateToMatFromNoti(matId) {
+        const mat = mattresses.find(m => m.id === matId);
+        if(mat) openMonitorScreen(mat);
+        else alert("해당 매트리스 정보를 찾을 수 없습니다.");
+    }
+
+    function deleteNotification(event, id) { 
+        event.stopPropagation();
+        notifications = notifications.filter(n => n.id !== id); 
+        renderNotifications(); 
+    }
+    
+    function clearAllNotifications() { notifications = []; renderNotifications(); }
+
+    function getColorInfo(score) {
+        if (score <= 20) return { color: '#4caf50', status: '위험 Level 1' };
+        if (score <= 40) return { color: '#fbc02d', status: '위험 Level 2' };
+        if (score <= 60) return { color: '#ffa000', status: '위험 Level 3' };
+        if (score <= 80) return { color: '#e53935', status: '위험 Level 4' };
+        return { color: '#212121', status: '위험 Level 5' };
+    }
+
+    /* 5x5 체압 그리드 생성 (25개 센서) */
+    window.create5x5Grid = function() {
+        const grid = document.getElementById('grid-5x5'); if(!grid) return;
+        grid.innerHTML = ""; pressCellIndex = null;
+        for (let i = 0; i < 25; i++) {
+            const cell = document.createElement('div'); cell.className = 'grid-cell';
+            const item = window.pressGridData[i] || { score: 0 };
+            const info = getColorInfo(item.score); 
+            cell.style.backgroundColor = info.color;
+            cell.onclick = function() {
+                if (pressCellIndex === i) { openPressModal(i); }
+                else { document.querySelectorAll('#grid-5x5 .grid-cell').forEach(c => c.classList.remove('selected')); cell.classList.add('selected'); pressCellIndex = i; }
+            };
+            grid.appendChild(cell);
+        }
+    };
+
+    /* 2x2 온습도 그리드 생성 (4개 구역 A~D) */
+    window.create2x2Grid = function() {
+        const grid = document.getElementById('grid-2x2'); if(!grid) return;
+        grid.innerHTML = "";
+        const labels = ["구역 A", "구역 B", "구역 C", "구역 D"];
+
+        for (let i = 0; i < 4; i++) {
+            const cell = document.createElement('div'); cell.className = 'env-card-cell';
+            const item = window.envGridData[i] || { temp: "0.0", humi: 0 };
+            cell.innerHTML = `
+                <div class="env-cell-title">${labels[i]}</div>
+                <div class="env-cell-val" style="color:#ef4444;"><i class="fa-solid fa-temperature-half" style="font-size:11px;"></i> ${item.temp} °C</div>
+                <div class="env-cell-val" style="color:#0284c7;"><i class="fa-solid fa-droplet" style="font-size:11px;"></i> ${item.humi} %</div>
+            `;
+            grid.appendChild(cell);
+        }
+    };
+
+    function formatTimeDetailed(totalSec) {
+        const hrs = Math.floor(totalSec / 3600);
+        const mins = Math.floor((totalSec % 3600) / 60);
+        const secs = totalSec % 60;
+        let result = "";
+        if (hrs > 0) result += `${hrs}시간 `;
+        if (mins > 0 || hrs > 0) result += `${mins}분 `;
+        result += `${secs}초`;
+        return result;
+    }
+
+    function openPressModal(index) {
+        const data = window.pressGridData[index] || { score:0, pressure:0, durationSec:0 };
+        const info = getColorInfo(data.score);
+        const row = Math.floor(index / 5) + 1, col = (index % 5) + 1;
+        document.getElementById('modal-title').innerText = `체압 센서 (행 ${row}, 열 ${col})`;
+        document.getElementById('modal-body-content').innerHTML = `
+            <div class="info-row"><span class="info-label">압력 점수:</span><span class="info-value">${data.score}점</span></div>
+            <div class="info-row"><span class="info-label">위험 등급:</span><span class="info-value" style="color:${info.color === '#212121' ? '#000' : info.color}">${info.status}</span></div>
+            <div class="info-row"><span class="info-label">압력 크기:</span><span class="info-value">${data.pressure} kPa</span></div>
+            <div class="info-row"><span class="info-label">유지 시간:</span><span class="info-value">${formatTimeDetailed(data.durationSec)}</span></div>`;
+        document.getElementById('info-modal').classList.add('active');
+    }
+
+    function saveCurrentStateRecord() {
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${now.toLocaleTimeString()}`;
+        const avgPressure = (window.pressGridData.reduce((acc, p) => acc + parseFloat(p.pressure || 0), 0) / 25).toFixed(1);
+        const avgTemp = (window.envGridData.reduce((acc, e) => acc + parseFloat(e.temp || 0), 0) / 4).toFixed(1);
+        const avgHumi = Math.round(window.envGridData.reduce((acc, e) => acc + (e.humi || 0), 0) / 4);
+
+        const newRecord = {
+            id: Date.now(),
+            timeStr: dateStr,
+            avgPressure, avgTemp, avgHumi,
+            pressSnap: JSON.parse(JSON.stringify(window.pressGridData)),
+            envSnap: JSON.parse(JSON.stringify(window.envGridData))
+        };
+
+        savedRecords.unshift(newRecord);
+        renderRecordHistory();
+    }
+
+    function renderRecordHistory() {
+        const container = document.getElementById('record-history-container');
+        if (savedRecords.length === 0) {
+            container.innerHTML = `<p style="font-size:12px; color:#94a3b8; text-align:center;">저장된 상태 기록이 없습니다.</p>`;
+            return;
+        }
+
+        container.innerHTML = "";
+        savedRecords.forEach(rec => {
+            container.innerHTML += `
+                <div class="record-card" onclick="openSnapshotModal(${rec.id})">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="font-size:11px; color:#94a3b8;"><i class="fa-regular fa-clock"></i> ${rec.timeStr}</span>
+                        <i class="fa-solid fa-trash-can" onclick="deleteRecord(event, ${rec.id})" style="color:#ef4444; padding:2px 4px; font-size:13px;"></i>
+                    </div>
+                    <div class="info-row" style="margin-bottom:0; font-size:13px;">
+                        <span>평균 체압: <b>${rec.avgPressure} kPa</b></span>
+                        <span>평균 온/습도: <b style="color:#ef4444;">${rec.avgTemp}°C</b> / <b style="color:#0284c7;">${rec.avgHumi}%</b></span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function openSnapshotModal(recId) {
+        const rec = savedRecords.find(r => r.id === recId);
+        if(!rec) return;
+
+        document.getElementById('snap-title').innerText = "기록 당시 매트리스 스냅샷";
+        document.getElementById('snap-time').innerText = `저장 일시: ${rec.timeStr}`;
+
+        const g5 = document.getElementById('snap-grid-5x5'); g5.innerHTML = "";
+        rec.pressSnap.forEach(p => {
+            const cell = document.createElement('div'); cell.className = 'grid-cell';
+            cell.style.backgroundColor = getColorInfo(p.score).color;
+            g5.appendChild(cell);
+        });
+
+        const g2 = document.getElementById('snap-grid-2x2'); g2.innerHTML = "";
+        const labels = ["구역 A", "구역 B", "구역 C", "구역 D"];
+        rec.envSnap.forEach((e, idx) => {
+            const cell = document.createElement('div'); cell.className = 'env-card-cell';
+            cell.innerHTML = `
+                <div class="env-cell-title">${labels[idx]}</div>
+                <div class="env-cell-val" style="color:#ef4444;"><i class="fa-solid fa-temperature-half" style="font-size:11px;"></i> ${e.temp} °C</div>
+                <div class="env-cell-val" style="color:#0284c7;"><i class="fa-solid fa-droplet" style="font-size:11px;"></i> ${e.humi} %</div>
+            `;
+            g2.appendChild(cell);
+        });
+
+        switchSnapGridMode('press');
+        document.getElementById('history-snapshot-modal').classList.add('active');
+    }
+
+    function switchSnapGridMode(mode) {
+        const slider = document.getElementById('snap-grid-slider'), swP = document.getElementById('snap-sw-press'), swE = document.getElementById('snap-sw-env');
+        if(mode === 'press') {
+            slider.style.transform = 'translateX(0%)';
+            swP.className = 'switch-btn active-press'; swE.className = 'switch-btn';
+        } else {
+            slider.style.transform = 'translateX(-50%)';
+            swE.className = 'switch-btn active-env'; swP.className = 'switch-btn';
+        }
+    }
+
+    function deleteRecord(event, id) {
+        event.stopPropagation();
+        savedRecords = savedRecords.filter(r => r.id !== id);
+        renderRecordHistory();
+    }
+
+    function toggleGearPopover(event) {
+        event.stopPropagation();
+        document.getElementById('gear-popover').classList.toggle('active');
+    }
+
+    function closePopoverOutside(event) {
+        const popover = document.getElementById('gear-popover');
+        if(popover && popover.classList.contains('active') && !event.target.closest('#gear-popover') && !event.target.closest('#gear-icon-btn')) {
+            popover.classList.remove('active');
+        }
+    }
+
+    function openEditPatientModal() {
+        document.getElementById('gear-popover').classList.remove('active');
+        const currentMat = mattresses.find(m => m.id === currentActiveMatId);
+        if(!currentMat) return;
+
+        document.getElementById('edit-mat-name').value = currentMat.matName;
+        document.getElementById('edit-pat-name').value = currentMat.patName;
+        document.getElementById('edit-pat-loc').value = currentMat.patLoc;
+
+        const select = document.getElementById('edit-risk-level');
+        if (currentMat.score <= 9) select.value = "extreme";
+        else if (currentMat.score <= 12) select.value = "high";
+        else if (currentMat.score <= 14) select.value = "mid";
+        else if (currentMat.score <= 18) select.value = "low";
+        else select.value = "normal";
+
+        document.getElementById('edit-patient-modal').classList.add('active');
+    }
+
+    function savePatientEdit() {
+        const currentMat = mattresses.find(m => m.id === currentActiveMatId);
+        if(!currentMat) return;
+
+        const newMatName = document.getElementById('edit-mat-name').value;
+        const newPatName = document.getElementById('edit-pat-name').value;
+        const newPatLoc = document.getElementById('edit-pat-loc').value;
+        const riskLevel = document.getElementById('edit-risk-level').value;
+
+        if(!newMatName || !newPatName || !newPatLoc) {
+            alert("모든 입력 항목을 채워주세요.");
+            return;
+        }
+
+        let newScore = 20, newRiskText = "정상(위험성 낮음)";
+        if (riskLevel === "extreme") { newScore = 8; newRiskText = "최고 위험군"; }
+        else if (riskLevel === "high") { newScore = 11; newRiskText = "고위험군"; }
+        else if (riskLevel === "mid") { newScore = 14; newRiskText = "중정도 위험군"; }
+        else if (riskLevel === "low") { newScore = 17; newRiskText = "저위험군"; }
+
+        currentMat.matName = newMatName;
+        currentMat.patName = newPatName;
+        currentMat.patLoc = newPatLoc;
+        currentMat.score = newScore;
+        currentMat.riskText = newRiskText;
+
+        document.getElementById('mon-mat-name').innerText = newMatName;
+        document.getElementById('mon-pat-name').innerText = newPatName;
+        document.getElementById('mon-pat-loc').innerText = newPatLoc;
+        document.getElementById('mon-risk-badge-container').innerHTML = getModernBadgeHTML(newScore, newRiskText);
+
+        renderMattressList();
+        closeModal('edit-patient-modal');
+        alert("환자 정보 및 위험도가 수정되었습니다.");
+    }
+
+    function openSettingsModal() {
+        document.getElementById('gear-popover').classList.remove('active');
+        document.getElementById('settings-modal').classList.add('active');
+    }
+
+    function saveSettingsAndClose() {
+        closeModal('settings-modal');
+        alert("알림 임계값이 저장되었습니다.");
+    }
+
+    function promptResetGrid() {
+        document.getElementById('gear-popover').classList.remove('active');
+        document.getElementById('confirm-modal').classList.add('active');
+    }
+
+    function confirmReset(saveFirst) {
+        closeModal('confirm-modal');
+        if (saveFirst) { saveCurrentStateRecord(); }
+
+        window.pressGridData = Array(25).fill(0).map(() => ({ score: 0, pressure: "0.0", durationSec: 0 }));
+        window.envGridData = Array(4).fill(0).map(() => ({ temp: "0.0", humi: 0 }));
+
+        window.create5x5Grid(); 
+        window.create2x2Grid();
+        alert("모든 센서 값 및 유지시간이 0으로 초기화되었습니다.");
+    }
+
+    function promptDeleteMattress(event, matId) {
+        event.stopPropagation();
+        const mat = mattresses.find(m => m.id === matId);
+        if (!mat) return;
+
+        targetDeleteMatId = matId;
+        document.getElementById('delete-mat-target-name').innerText = mat.matName;
+        document.getElementById('delete-mat-modal').classList.add('active');
+    }
+
+    function confirmDeleteMattress() {
+        if (!targetDeleteMatId) return;
+        
+        mattresses = mattresses.filter(m => m.id !== targetDeleteMatId);
+        if (currentActiveMatId === targetDeleteMatId) {
+            currentActiveMatId = null;
+        }
+        
+        targetDeleteMatId = null;
+        closeModal('delete-mat-modal');
+        renderMattressList();
+    }
+
+    function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+
+    function renderMattressList() {
+        const container = document.getElementById('mattress-list-container');
+        document.getElementById('mat-count').innerText = "연결됨: " + mattresses.length + "개";
+        if (mattresses.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state-box">
+                    <div class="circle-icon"><i class="fa-solid fa-bed"></i></div>
+                    <div class="empty-title">연결된 매트리스가 없습니다</div>
+                    <div class="empty-desc">새로운 매트리스를 추가하여 모니터링을 시작하세요</div>
+                </div>`;
+            return;
+        }
+        container.innerHTML = "";
+        mattresses.forEach(mat => {
+            const card = document.createElement('div'); card.className = 'mattress-card'; card.onclick = () => openMonitorScreen(mat);
+            card.innerHTML = `
+                <div class="mattress-header">
+                    <div class="mat-title-group">
+                        <span class="mat-title">${mat.matName}</span>
+                    </div>
+                    <div class="mat-header-right">
+                        ${getModernBadgeHTML(mat.score, mat.riskText)}
+                        <i class="fa-solid fa-trash-can delete-mat-btn" onclick="promptDeleteMattress(event, ${mat.id})" title="매트리스 삭제"></i>
+                    </div>
+                </div>
+                <div style="font-size: 13px; color:#475569; margin-bottom: 5px;"><i class="fa-solid fa-user" style="color: #43a047; margin-right:6px;"></i> 환자: ${mat.patName}</div>
+                <div style="font-size: 13px; color:#475569;"><i class="fa-solid fa-location-dot" style="color: #43a047; margin-right:6px;"></i> 위치: ${mat.patLoc}</div>`;
+            container.appendChild(card);
+        });
+    }
+</script>
+</body>
+</html>S
